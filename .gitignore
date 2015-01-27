@@ -1,0 +1,9 @@
+# Ignore local development files.
+.ruby-gemset
+.ruby-version
+
+# Ignore packaged node modules.
+/node_modules
+
+# Ignore temporary files.
+/tmp
