@@ -3,6 +3,7 @@
 .ruby-version
 
 # Ignore packaged node modules.
+npm-debug.log
 /node_modules
 
 # Ignore temporary files.
