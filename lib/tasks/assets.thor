@@ -4,6 +4,7 @@ class AssetTasks < Thor
   namespace :assets
 
   desc 'compile FILES', 'Compiles the specified asset(s)'
+  method_option :module,  :type => :string,                     :aliases => '-m'
   method_option :output,  :type => :string,  :required => true, :aliases => '-o'
   method_option :package, :type => :string,                     :aliases => '-p'
   method_option :verbose, :type => :boolean, :default => false, :aliases => '-v'
@@ -26,17 +27,21 @@ class AssetTasks < Thor
 
     if options['package'] && options['package'].length > 0
       package_name = camelize(options['package'])
+      module_name  = (options['module'] && options['module'].length > 0) ?
+        camelize(options['module']) :
+        package_name
+
       puts "Appending package definition for module #{package_name}"
 
       package_file = "tmp/#{underscore(package_name)}_package.coffee"
       File.write package_file, <<-PACKAGE
 if typeof(exports) != 'undefined'
   if typeof module != 'undefined' && module.exports
-    exports = module.exports = #{package_name}
+    exports = module.exports = #{module_name}
 
-  exports.#{package_name} = #{package_name}
+  exports.#{package_name} = #{module_name}
 else
-  this.#{package_name} = #{package_name}
+  this.#{package_name} = #{module_name}
       PACKAGE
 
       resolved_list << package_file

@@ -15,9 +15,9 @@
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = Dragon;
     }
-    exports.Dragon = Dragon;
+    exports.CardDragon = Dragon;
   } else {
-    this.Dragon = Dragon;
+    this.CardDragon = Dragon;
   }
 
 }).call(this);
