@@ -12,6 +12,181 @@
     }
   };
 
+  // Compiled from src/dragon-elements/elements.coffee
+  Dragon.Elements = {};
+
+  // Compiled from src/dragon/game.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Dragon.Game = (function() {
+    function Game() {
+      this.getPlayers = __bind(this.getPlayers, this);
+      this.addPlayer = __bind(this.addPlayer, this);
+      this.start = __bind(this.start, this);
+    }
+
+    Game.prototype.start = function() {
+      return null;
+    };
+
+
+    /* Players */
+
+    Game.prototype.addPlayer = function(player) {
+      this._players.push(player);
+      return player.game = this;
+    };
+
+    Game.prototype.getPlayers = function() {
+      return this._players;
+    };
+
+    Game.prototype._players = [];
+
+    return Game;
+
+  })();
+
+  // Compiled from src/dragon-elements/game.coffee
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Dragon.Elements.Game = (function(_super) {
+    __extends(Game, _super);
+
+    function Game() {
+      return Game.__super__.constructor.apply(this, arguments);
+    }
+
+    return Game;
+
+  })(Dragon.Game);
+
+  // Compiled from src/dragon/card_list.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Dragon.CardList = (function() {
+    function CardList() {
+      this.length = __bind(this.length, this);
+      this.getCards = __bind(this.getCards, this);
+      this.addCard = __bind(this.addCard, this);
+    }
+
+
+    /* Cards */
+
+    CardList.prototype._cards = [];
+
+    CardList.prototype.addCard = function(card) {
+      return this._cards.push(card);
+    };
+
+    CardList.prototype.getCards = function() {
+      return this._cards;
+    };
+
+    CardList.prototype.length = function() {
+      return this._cards.length;
+    };
+
+    return CardList;
+
+  })();
+
+  // Compiled from src/dragon/player.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Dragon.Player = (function() {
+    function Player() {
+      this.getCards = __bind(this.getCards, this);
+      this.setGame = __bind(this.setGame, this);
+      this.getGame = __bind(this.getGame, this);
+      this._hand = new Dragon.CardList();
+    }
+
+
+    /* Game */
+
+    Player.prototype._game = null;
+
+    Player.prototype.getGame = function() {
+      return this._game;
+    };
+
+    Player.prototype.setGame = function(game) {
+      return this._game = game;
+    };
+
+
+    /* Hand */
+
+    Player.prototype._hand = null;
+
+    Player.prototype.getCards = function() {
+      return this._hand.getCards();
+    };
+
+    return Player;
+
+  })();
+
+  // Compiled from src/dragon-elements/player.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Dragon.Elements.Player = (function(_super) {
+    __extends(Player, _super);
+
+    function Player() {
+      this.drawCards = __bind(this.drawCards, this);
+      this.drawCard = __bind(this.drawCard, this);
+      this.setDeck = __bind(this.setDeck, this);
+      this.getDeck = __bind(this.getDeck, this);
+      this.setup = __bind(this.setup, this);
+      return Player.__super__.constructor.apply(this, arguments);
+    }
+
+    Player.prototype.setup = function() {
+      return this.drawCards(5);
+    };
+
+
+    /* Deck */
+
+    Player.prototype._deck = null;
+
+    Player.prototype.getDeck = function() {
+      return this._deck;
+    };
+
+    Player.prototype.setDeck = function(deck) {
+      return this._deck = deck;
+    };
+
+
+    /* Hand */
+
+    Player.prototype.drawCard = function() {
+      return _hand.push(_deck.drawCard());
+    };
+
+    Player.prototype.drawCards = function(count) {
+      var _results;
+      if (count === 0) {
+        return;
+      }
+      _results = [];
+      while (--count && this.drawCard()) {
+        _results.push(null);
+      }
+      return _results;
+    };
+
+    return Player;
+
+  })(Dragon.Player);
+
   // Compiled from src/dragon/card.coffee
   Dragon.Card = (function() {
     function Card() {}
@@ -21,28 +196,46 @@
   })();
 
   // Compiled from src/dragon/deck.coffee
-  Dragon.Deck = (function() {
-    function Deck() {}
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Dragon.Deck = (function(_super) {
+    __extends(Deck, _super);
+
+    function Deck() {
+      this.shuffle = __bind(this.shuffle, this);
+      this.drawCard = __bind(this.drawCard, this);
+      return Deck.__super__.constructor.apply(this, arguments);
+    }
+
+
+    /* Cards */
+
+    Deck.prototype.drawCard = function() {
+      return this._cards.pop();
+    };
+
+    Deck.prototype.shuffle = function() {
+      var i, j, u, v, _results;
+      i = this._cards.length;
+      if (i === 0) {
+        return;
+      }
+      _results = [];
+      while (--i) {
+        j = Math.floor(Math.random() * (i + 1));
+        u = this._cards[i];
+        v = this._cards[j];
+        this._cards[i] = v;
+        _results.push(this._cards[j] = u);
+      }
+      return _results;
+    };
 
     return Deck;
 
-  })();
-
-  // Compiled from src/dragon/game.coffee
-  Dragon.Game = (function() {
-    function Game() {}
-
-    return Game;
-
-  })();
-
-  // Compiled from src/dragon/player.coffee
-  Dragon.Player = (function() {
-    function Player() {}
-
-    return Player;
-
-  })();
+  })(Dragon.CardList);
 
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
