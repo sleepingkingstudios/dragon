@@ -12,8 +12,61 @@
     }
   };
 
+  // Compiled from src/dragon/card.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Dragon.Card = (function() {
+    function Card() {
+      this.displayName = __bind(this.displayName, this);
+    }
+
+    Card.prototype.displayName = function() {
+      return 'Card';
+    };
+
+    return Card;
+
+  })();
+
   // Compiled from src/dragon-elements/elements.coffee
   Dragon.Elements = {};
+
+  // Compiled from src/dragon-elements/card.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Dragon.Elements.Card = (function(_super) {
+    var _element;
+
+    __extends(Card, _super);
+
+    function Card(element) {
+      this.displayName = __bind(this.displayName, this);
+      this.getElement = __bind(this.getElement, this);
+      Card.__super__.constructor.call(this);
+      this._element = element;
+    }
+
+
+    /* Element */
+
+    Card.prototype.getElement = function() {
+      return this._element;
+    };
+
+    _element = null;
+
+
+    /* Name */
+
+    Card.prototype.displayName = function() {
+      return this.getElement();
+    };
+
+    return Card;
+
+  })(Dragon.Card);
 
   // Compiled from src/dragon/game.coffee
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -23,10 +76,26 @@
       this.getPlayers = __bind(this.getPlayers, this);
       this.addPlayer = __bind(this.addPlayer, this);
       this.start = __bind(this.start, this);
+      this.setup = __bind(this.setup, this);
     }
 
+    Game.prototype._setup = false;
+
+    Game.prototype.setup = function() {
+      var player, _i, _len, _ref, _setup;
+      if (_setup) {
+        return;
+      }
+      _ref = this.getPlayers();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        player = _ref[_i];
+        player.drawCards(5);
+      }
+      return _setup = true;
+    };
+
     Game.prototype.start = function() {
-      return null;
+      return this.setup();
     };
 
 
@@ -48,15 +117,29 @@
   })();
 
   // Compiled from src/dragon-elements/game.coffee
-  var __hasProp = {}.hasOwnProperty,
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Dragon.Elements.Game = (function(_super) {
     __extends(Game, _super);
 
     function Game() {
+      this.playCard = __bind(this.playCard, this);
+      this.endTurn = __bind(this.endTurn, this);
       return Game.__super__.constructor.apply(this, arguments);
     }
+
+    Game.prototype.endTurn = function() {
+      return null;
+    };
+
+    Game.prototype.playCard = function(player, card) {
+      var playerIndex;
+      playerIndex = this.getPlayers.indexOf(player);
+      console.log('Elements.Game#playCard(), playerIndex = ' + playerIndex);
+      return console.log(card);
+    };
 
     return Game;
 
@@ -67,15 +150,17 @@
 
   Dragon.CardList = (function() {
     function CardList() {
+      this.removeCard = __bind(this.removeCard, this);
       this.length = __bind(this.length, this);
       this.getCards = __bind(this.getCards, this);
       this.addCard = __bind(this.addCard, this);
+      this._cards = [];
     }
 
 
     /* Cards */
 
-    CardList.prototype._cards = [];
+    CardList.prototype._cards = null;
 
     CardList.prototype.addCard = function(card) {
       return this._cards.push(card);
@@ -87,6 +172,12 @@
 
     CardList.prototype.length = function() {
       return this._cards.length;
+    };
+
+    CardList.prototype.removeCard = function(card) {
+      var index;
+      index = this._cards.indexOf(card);
+      return this._cards.splice(index, 1);
     };
 
     return CardList;
@@ -139,8 +230,12 @@
     __extends(Player, _super);
 
     function Player() {
+      this._findCardByName = __bind(this._findCardByName, this);
+      this.playCard = __bind(this.playCard, this);
+      this.inspectHand = __bind(this.inspectHand, this);
       this.drawCards = __bind(this.drawCards, this);
       this.drawCard = __bind(this.drawCard, this);
+      this.discardCard = __bind(this.discardCard, this);
       this.setDeck = __bind(this.setDeck, this);
       this.getDeck = __bind(this.getDeck, this);
       this.setup = __bind(this.setup, this);
@@ -167,8 +262,12 @@
 
     /* Hand */
 
+    Player.prototype.discardCard = function(card) {
+      return null;
+    };
+
     Player.prototype.drawCard = function() {
-      return _hand.push(_deck.drawCard());
+      return this._hand.getCards().push(this._deck.drawCard());
     };
 
     Player.prototype.drawCards = function(count) {
@@ -177,23 +276,59 @@
         return;
       }
       _results = [];
-      while (--count && this.drawCard()) {
+      while (this.drawCard() && --count) {
         _results.push(null);
       }
       return _results;
     };
 
+    Player.prototype.inspectHand = function() {
+      var card, cards, _i, _len, _ref, _results;
+      cards = this.getCards();
+      if (cards.length === 0) {
+        console.log('You have no cards in your hand.');
+      }
+      _ref = this.getCards();
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        card = _ref[_i];
+        _results.push(console.log(card.displayName()));
+      }
+      return _results;
+    };
+
+    Player.prototype.playCard = function(name) {
+      var cards, matchingCards;
+      cards = this.getCards();
+      if (cards.length === 0) {
+        console.log('You have no cards in your hand.');
+        return false;
+      }
+      matchingCards = this._findCardByName(name);
+      if (matchingCards === null || matchingCards.length === 0) {
+        console.log("You have no cards named " + name + ".");
+        return false;
+      }
+      this._hand.removeCard(matchingCards[0]);
+      return console.log("You played " + name + "!");
+    };
+
+    Player.prototype._findCardByName = function(name) {
+      var card, cards, match, _i, _len;
+      match = [];
+      cards = this.getCards();
+      for (_i = 0, _len = cards.length; _i < _len; _i++) {
+        card = cards[_i];
+        if (card.displayName() === name) {
+          match.push(card);
+        }
+      }
+      return match;
+    };
+
     return Player;
 
   })(Dragon.Player);
-
-  // Compiled from src/dragon/card.coffee
-  Dragon.Card = (function() {
-    function Card() {}
-
-    return Card;
-
-  })();
 
   // Compiled from src/dragon/deck.coffee
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },

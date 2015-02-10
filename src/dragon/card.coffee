@@ -3,3 +3,4 @@
 #= require dragon
 
 class Dragon.Card
+  displayName: () => 'Card'

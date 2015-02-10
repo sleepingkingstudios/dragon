@@ -3,7 +3,17 @@
 #= require dragon
 
 class Dragon.Game
-  start: ()=> null
+  _setup: false
+
+  setup: ()=>
+    return if _setup
+
+    for player in @getPlayers()
+      player.drawCards(5);
+
+    _setup = true
+
+  start: ()=> @setup()
 
   ### Players ###
 

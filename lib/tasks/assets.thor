@@ -10,19 +10,7 @@ class AssetTasks < Thor
   method_option :package,  :type => :string,                     :aliases => '-p'
   method_option :verbose,  :type => :boolean, :default => false, :aliases => '-v'
   def compile *paths
-    resolver      = DependencyResolver.new 'src'
-    resolved_list = []
-
-    file_names = []
-    paths.uniq.each do |path|
-      file_names.concat extract_file_names(path)
-    end # each
-
-    puts "Source Files:\n- #{file_names.join("\n- ")}" if options[:verbose]
-
-    resolved_list = resolver.resolve(*file_names)
-
-    puts "Resolved Dependencies:\n#{resolved_list.map { |str| "- #{str}" }.join("\n") }" if options['verbose']
+    resolved_list = resolve_dependencies *paths, :verbose => options[:verbose]
 
     limit       = resolved_list.count - 1
     output_file = options['output']
@@ -82,6 +70,11 @@ PACKAGE
     Dir[File.join 'tmp', '*'].each { |file_name| File.delete(file_name) }
   end # method compile
 
+  desc 'dependencies FILES', 'Generates the dependency ordering for the specified asset(s)'
+  def dependencies *paths
+    resolve_dependencies *paths, verbose: true
+  end # method dependencies
+
   desc 'package FILES', 'Creates a CommonJS package exporting the specified module.'
   method_option :verbose, :type => :boolean, :default => false, :aliases => '-v'
   def package package_name, *paths
@@ -117,6 +110,24 @@ PACKAGE
     file_names
   end # method extract_file_names
 
+  def resolve_dependencies *paths, verbose: false
+    resolver      = DependencyResolver.new 'src'
+    resolved_list = []
+
+    file_names = []
+    paths.uniq.each do |path|
+      file_names.concat extract_file_names(path)
+    end # each
+
+    puts "Source Files:\n- #{file_names.join("\n- ")}" if verbose
+
+    resolved_list = resolver.resolve(*file_names)
+
+    puts "Resolved Dependencies:\n#{resolved_list.map { |str| "- #{str}" }.join("\n") }" if verbose
+
+    resolved_list
+  end
+
   def underscore string
     string.gsub(/[a-z][A-Z]/) { |match| "#{match[0]}_#{match[1]}".downcase }.downcase
   end # method underscore
@@ -124,7 +135,7 @@ PACKAGE
   class MissingDependencyError < StandardError; end
 
   class DependencyResolver
-    REQUIRE_PATTERN = /\A(\s*)#= require (?<name>[a-z0-9_\/]+)\z/
+    REQUIRE_PATTERN = /\A(\s*)#= require (?<name>[a-z0-9_\-\/]+)\z/
 
     def initialize root_path, *additional_paths, **options
       defaults = { :file_extensions => ['.coffee', '.js.coffee', '.litcoffee'] }
@@ -140,7 +151,7 @@ PACKAGE
     attr_reader :file_extensions, :root_paths
 
     def file_pattern
-      name_capture = "(?<name>[a-z0-9_\/]+)"
+      name_capture = "(?<name>[a-z0-9_\-\/]+)"
       extension_capture = "(?<file_extension>" +
         file_extensions.join("|") + ")"
       pattern = /\A#{name_capture}#{extension_capture}/
