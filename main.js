@@ -42,10 +42,12 @@ game.addPlayer(opponent);
 game.start();
 
 // Set up the client.
-var client = require('readline').createInterface({
+var io = require('readline').createInterface({
   input:  process.stdin,
   output: process.stdout
 });
+
+var client = new CardDragon.Elements.Client(player);
 
 var print = function(str) {
   process.stdout.write(str);
@@ -56,29 +58,18 @@ print('> ');
 var match    = null;
 var cardName = null;
 
-client.on('line', function(line) {
+io.on('line', function(line) {
+  line = line.trim();
+
   switch(line.trim()) {
     case 'q' :
     case 'quit' :
     case 'exit' :
-      client.close();
-      break;
-    case 'look' :
-      player.inspectHand();
-      print('> ');
-      break;
-    case 'peek' :
-      var cards = _.map(player.getDeck().getCards(), function(card) { return card.displayName(); });
-      console.log(cards);
-      print('> ');
-      break;
-    default :
-      if(match = line.match(/^play\s+([A-Za-z ]+)/)) {
-        cardName = match[1]
-        player.playCard(cardName);
-      }
-
-      print('> ');
-      break;
+      io.close();
+      return;
   }
+
+  console.log(client.runCommand(line));
+
+  print('> ');
 });

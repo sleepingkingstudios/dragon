@@ -30,27 +30,29 @@ class Dragon.Elements.Player extends Dragon.Player
     cards = @getCards()
 
     if cards.length is 0
-      console.log 'You have no cards in your hand.'
+      return 'You have no cards in your hand.'
 
+    str = ''
     for card in @getCards()
-      console.log(card.displayName());
+      str += card.displayName()
+      str += "\n"
+
+    str.trim()
 
   playCard: (name) =>
     cards = @getCards()
 
     if cards.length is 0
-      console.log 'You have no cards in your hand.'
-      return false
+      return 'You have no cards in your hand.'
 
     matchingCards = @_findCardByName(name)
 
     if matchingCards is null or matchingCards.length is 0
-      console.log "You have no cards named #{name}."
-      return false
+      return "You have no cards named #{name}."
 
     @_hand.removeCard(matchingCards[0])
 
-    console.log "You played #{name}!"
+    return "You played #{name}!"
 
   _findCardByName: (name) =>
     match = []

@@ -68,6 +68,43 @@
 
   })(Dragon.Card);
 
+  // Compiled from src/dragon-elements/client.coffee
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Dragon.Elements.Client = (function() {
+    function Client(player) {
+      this.runCommand = __bind(this.runCommand, this);
+      this.getPlayer = __bind(this.getPlayer, this);
+      this._player = player;
+    }
+
+
+    /* Player */
+
+    Client.prototype._player = null;
+
+    Client.prototype.getPlayer = function() {
+      return this._player;
+    };
+
+
+    /* Commands */
+
+    Client.prototype.runCommand = function(command) {
+      var match, player;
+      player = this.getPlayer();
+      if (command === 'look') {
+        return player.inspectHand();
+      }
+      if (match = command.match(/^play\s+([A-Za-z ]+)/)) {
+        return player.playCard(match[1]);
+      }
+    };
+
+    return Client;
+
+  })();
+
   // Compiled from src/dragon/game.coffee
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -283,34 +320,33 @@
     };
 
     Player.prototype.inspectHand = function() {
-      var card, cards, _i, _len, _ref, _results;
+      var card, cards, str, _i, _len, _ref;
       cards = this.getCards();
       if (cards.length === 0) {
-        console.log('You have no cards in your hand.');
+        return 'You have no cards in your hand.';
       }
+      str = '';
       _ref = this.getCards();
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         card = _ref[_i];
-        _results.push(console.log(card.displayName()));
+        str += card.displayName();
+        str += "\n";
       }
-      return _results;
+      return str.trim();
     };
 
     Player.prototype.playCard = function(name) {
       var cards, matchingCards;
       cards = this.getCards();
       if (cards.length === 0) {
-        console.log('You have no cards in your hand.');
-        return false;
+        return 'You have no cards in your hand.';
       }
       matchingCards = this._findCardByName(name);
       if (matchingCards === null || matchingCards.length === 0) {
-        console.log("You have no cards named " + name + ".");
-        return false;
+        return "You have no cards named " + name + ".";
       }
       this._hand.removeCard(matchingCards[0]);
-      return console.log("You played " + name + "!");
+      return "You played " + name + "!";
     };
 
     Player.prototype._findCardByName = function(name) {
