@@ -5,12 +5,13 @@ class AssetTasks < Thor
 
   desc 'compile FILES', 'Compiles the specified asset(s)'
   method_option :annotate, :type => :boolean, :default => false, :aliases => '-a'
+  method_option :exclude,  :type => :array
   method_option :module,   :type => :string,                     :aliases => '-m'
   method_option :output,   :type => :string,  :required => true, :aliases => '-o'
   method_option :package,  :type => :string,                     :aliases => '-p'
   method_option :verbose,  :type => :boolean, :default => false, :aliases => '-v'
   def compile *paths
-    resolved_list = resolve_dependencies *paths, :verbose => options[:verbose]
+    resolved_list = resolve_dependencies *paths, excluded_patterns: options['exclude'], :verbose => options[:verbose]
 
     limit       = resolved_list.count - 1
     output_file = options['output']
@@ -52,11 +53,11 @@ class AssetTasks < Thor
       compiled_js << "\n" << <<-PACKAGE
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = #{module_name};
+      module.exports = #{module_name};
     }
-    exports.#{package_name} = #{module_name};
+    exports = #{module_name};
   } else {
-    this.#{package_name} = #{module_name};
+    this.#{package_name} = #{module_name.split('.').first};
   }
 PACKAGE
 
@@ -71,8 +72,9 @@ PACKAGE
   end # method compile
 
   desc 'dependencies FILES', 'Generates the dependency ordering for the specified asset(s)'
+  method_option :exclude, :type => :array
   def dependencies *paths
-    resolve_dependencies *paths, verbose: true
+    resolve_dependencies *paths, excluded_patterns: options['exclude'], verbose: true
   end # method dependencies
 
   desc 'package FILES', 'Creates a CommonJS package exporting the specified module.'
@@ -94,14 +96,18 @@ PACKAGE
     string.gsub(/._./) { |match| "#{match[0]}#{match[2].capitalize}" }.tap { |str| str[0] = str[0].capitalize }
   end # method camelize
 
-  def extract_file_names file_path
+  def extract_file_names file_path, excluded_patterns
     file_names = []
+
+    excluded_patterns.each do |pattern|
+      return [] if file_path.match pattern
+    end unless excluded_patterns.nil? # each
 
     if File.directory?(file_path)
       directory_files = Dir[File.join file_path, '*']
 
       directory_files.each do |file_path|
-        file_names.concat extract_file_names(file_path)
+        file_names.concat extract_file_names(file_path, excluded_patterns)
       end # each
     elsif File.file?(file_path)
       file_names << file_path
@@ -110,13 +116,15 @@ PACKAGE
     file_names
   end # method extract_file_names
 
-  def resolve_dependencies *paths, verbose: false
+  def resolve_dependencies *paths, excluded_patterns: [], verbose: false
+    puts "Excluded Patterns:\n- #{excluded_patterns.join("\n- ")}" if verbose && excluded_patterns.count > 0
+
     resolver      = DependencyResolver.new 'src'
     resolved_list = []
 
     file_names = []
     paths.uniq.each do |path|
-      file_names.concat extract_file_names(path)
+      file_names.concat extract_file_names(path, excluded_patterns)
     end # each
 
     puts "Source Files:\n- #{file_names.join("\n- ")}" if verbose

@@ -10,7 +10,8 @@
   "private": true,
 
   "dependencies": {
-    "coffee-script": "~1.8.0"
+    "coffee-script": "~1.8.0",
+    "underscore": "~1.7.0"
   },
   "devDependencies": {
     "jasmine": "~2.1.1"

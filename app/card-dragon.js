@@ -3,7 +3,7 @@
   // Compiled from src/dragon.coffee
   var Dragon, SleepingKingStudios;
 
-  SleepingKingStudios = require('./sleeping_king_studios').SleepingKingStudios;
+  SleepingKingStudios = require('./sleeping_king_studios');
 
   Dragon = {
     greet: SleepingKingStudios.Greeter.greet,
@@ -162,20 +162,12 @@
     __extends(Game, _super);
 
     function Game() {
-      this.playCard = __bind(this.playCard, this);
       this.endTurn = __bind(this.endTurn, this);
       return Game.__super__.constructor.apply(this, arguments);
     }
 
     Game.prototype.endTurn = function() {
       return null;
-    };
-
-    Game.prototype.playCard = function(player, card) {
-      var playerIndex;
-      playerIndex = this.getPlayers.indexOf(player);
-      console.log('Elements.Game#playCard(), playerIndex = ' + playerIndex);
-      return console.log(card);
     };
 
     return Game;
